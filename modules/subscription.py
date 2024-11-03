@@ -34,10 +34,10 @@ async def subscribe(bot: TgBot, user: UserModel, target_id: int):
                                                                  }))
         await bot.add_message_to_queue(target_user.user_id, format_text(messages_texts["subscribe_friend"],
                                                                         {
-                                                                            "f_n": target_user.f_n,
-                                                                            "l_n": target_user.l_n if target_user.l_n
+                                                                            "f_n": user.f_n,
+                                                                            "l_n": user.l_n if user.l_n
                                                                             else "",
-                                                                            "user_id": target_user.user_id
+                                                                            "user_id": user.user_id
                                                                         }))
     else:
         if target_user.private:
