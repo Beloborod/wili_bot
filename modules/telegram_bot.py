@@ -52,7 +52,7 @@ class TgBot(AsyncTeleBot):
 
         new_queue_element = ApiQueue()
         new_queue_element.user = user
-        if re.match("[.\n\s\S]*(?:\s*\n){3,}[.\n\s\S]*", text):
+        if (text is not None) and re.match("[.\n\s\S]*(?:\s*\n){3,}[.\n\s\S]*", text):
             text = re.sub("(\s*\n){3,}", "", text)
         new_queue_element.text = text
         new_queue_element.message_id = message_id
