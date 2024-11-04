@@ -16,6 +16,10 @@ async def command_coordinator(bot: TgBot, message: telebot.types.Message):
         await cancel_action(bot, user)
         return
 
+    if user.status['state'] == "subscribe":
+        await cancel_action(bot, user)
+        user.reload()
+
     if user.status['state'] == "idle":
         if command == "start":
             await bot.add_message_to_queue(message.chat.id, format_text(messages_texts['start']))

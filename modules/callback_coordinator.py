@@ -170,7 +170,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                                                reply_markup=cancel_keyboard(
                                                    [telebot.types.InlineKeyboardButton(
                                                        constants['accept'],
-                                                       callback_data=f"wish:{data[1]}:realize_acc")]))
+                                                       callback_data=f"wish:{data[1]}:realize_acc")]),
+                                               action="edit_message", message_id=call.message.message_id)
             elif data[-1] == "realize_acc":
                 try:
                     wish = WishModel.objects.get(id=data[1], completed=False)
@@ -191,6 +192,9 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                 await bot.add_message_to_queue(call.message.chat.id, mes, action="edit_message",
                                                message_id=call.message.message_id)
                 wish.completed = True
+                wish.save()
+                user.wishes[wish.category].remove(wish)
+                user.save()
             elif data[-1] == "refuse":
                 try:
                     wish = WishModel.objects.get(id=data[1], executor=user, completed=False)

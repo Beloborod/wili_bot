@@ -16,6 +16,7 @@ from models.user import UserModel
 from configs.telegram_api import config as tg_api
 from modules.setup_logger import special_logger
 from configs.bot_settings import config as bot_config
+from configs.messages import config as messages_text
 
 
 class TgBot(AsyncTeleBot):
@@ -52,8 +53,6 @@ class TgBot(AsyncTeleBot):
 
         new_queue_element = ApiQueue()
         new_queue_element.user = user
-        if (text is not None) and re.match("[.\n\s\S]*(?:\s*\n){3,}[.\n\s\S]*", text):
-            text = re.sub("(\s*\n){3,}", "", text)
         new_queue_element.text = text
         new_queue_element.message_id = message_id
         new_queue_element.keyboard = pickle.dumps(reply_markup) if reply_markup else None
@@ -160,6 +159,10 @@ class TgBot(AsyncTeleBot):
                                                             message_id=str(action.message_id),
                                                             message_text=action.text,
                                                             message_inline_keyboard=action.keyboard)
+                        await self.edit_message_text(chat_id=action.user.user_id,
+                                                     text=messages_text['old_message'],
+                                                     parse_mode=action.parse_mode,
+                                                     message_id=action.message_id)
                         action.delete()
                         return
                     except mongoengine.errors.DoesNotExist:
