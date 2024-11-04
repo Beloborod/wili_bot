@@ -9,7 +9,7 @@ from modules.subscription import get_friends_keyboard, get_friend_message_keyboa
 from modules.system import format_text, cancel_keyboard, cancel_action, check_text
 from modules.telegram_bot import TgBot
 from modules.wishes import get_wishes_owner_keyboard, save_wish, get_friend_wishes_keyboard, \
-    get_wishes_accepted_keyboard
+    get_wishes_accepted_keyboard, get_category_keyboard
 
 
 async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
@@ -56,6 +56,10 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                                                                }),
                                                    action="edit_message", message_id=call.message.message_id,
                                                    reply_markup=keyboard)
+            elif data[-1] == "list":
+                await bot.add_message_to_queue(call.message.chat.id, format_text(messages_texts['choose_category']),
+                                               reply_markup=get_category_keyboard(user, "0:look"),
+                                               action="edit_message", message_id=call.message.message_id)
 
         elif data[0] == "execute_wish":
             try:
