@@ -159,18 +159,24 @@ class TgBot(AsyncTeleBot):
                                                             message_id=str(action.message_id),
                                                             message_text=action.text,
                                                             message_inline_keyboard=action.keyboard)
-                        await self.edit_message_text(chat_id=action.user.user_id,
-                                                     text=messages_text['old_message'],
-                                                     parse_mode=action.parse_mode,
-                                                     message_id=action.message_id)
                         action.delete()
                         return
                     except mongoengine.errors.DoesNotExist:
-                        result = await self.edit_message_text(chat_id=action.user.user_id, text=action.text,
-                                                              parse_mode=action.parse_mode,
-                                                              reply_markup=pickle.loads(action.keyboard)
-                                                              if action.keyboard else None,
-                                                              message_id=action.message_id)
+                        try:
+                            already = QueueCallback.objects.get(user=action.user,
+                                                                message_id=str(action.message_id))
+                            result = await self.edit_message_text(chat_id=action.user.user_id, text=action.text,
+                                                                  parse_mode=action.parse_mode,
+                                                                  reply_markup=pickle.loads(action.keyboard)
+                                                                  if action.keyboard else None,
+                                                                  message_id=action.message_id)
+                        except mongoengine.errors.DoesNotExist:
+                            action.delete()
+                            await self.edit_message_text(chat_id=action.user.user_id,
+                                                         text=messages_text['old_message'],
+                                                         parse_mode=action.parse_mode,
+                                                         message_id=action.message_id)
+                            return
                 elif action.action == "delete_message":
                     result = await self.delete_message(chat_id=action.user.user_id, message_id=action.message_id)
                 if result and (type(result) is not bool):
