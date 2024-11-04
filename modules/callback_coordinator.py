@@ -81,6 +81,16 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                                                                "wish_description": wish.description,
                                                            }),
                                                action="edit_message", message_id=call.message.message_id)
+            else:
+                await bot.add_message_to_queue(call.message.chat.id,
+                                               format_text(messages_texts['not_subscriber_friend'],
+                                                           {
+                                                               "f_n": wish.owner.f_n,
+                                                               "l_n": wish.owner.l_n,
+                                                               "user_id": wish.owner.user_id
+                                                           }),
+                                               action="edit_message", message_id=call.message.message_id)
+                return
 
         elif data[0] == "wish":
             if data[-1] == "edit":
@@ -230,7 +240,7 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     return
                 if not (user in wish.owner.subscribes):
                     await bot.add_message_to_queue(call.message.chat.id,
-                                                   format_text(messages_texts['friend_private'],
+                                                   format_text(messages_texts['not_subscriber_friend'],
                                                                {
                                                                    "f_n": wish.owner.f_n,
                                                                    "l_n": wish.owner.l_n,
