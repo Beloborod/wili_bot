@@ -19,7 +19,9 @@ async def subscribe(bot: TgBot, user: UserModel, target_id: int):
     except mongoengine.errors.DoesNotExist:
         await bot.add_message_to_queue(user.user_id, format_text(messages_texts["cant_subscribe"]))
         return
-
+    if target_user in user.subscribes:
+        await bot.add_message_to_queue(user.user_id, format_text(messages_texts["already_subscribe"]))
+        return
     user.subscribes.append(target_user)
     user.save()
 
@@ -69,7 +71,8 @@ def unsubscribe(user: UserModel, target: UserModel):
             wish.executor = None
             wish.save()
 
-    for wish in user.wishes:
+    wishes = WishModel.objects(executor=target)
+    for wish in wishes:
         if wish.executor == target:
             wish.executor = None
             wish.save()
