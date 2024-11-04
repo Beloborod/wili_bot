@@ -140,8 +140,8 @@ def get_friend_wishes_keyboard(user: UserModel, friend_id: str, category: str, c
 
     wishes = friend.wishes[category] if category in friend.wishes.keys() else []
 
-    if len(wishes) == 0:
-        return False
+    # if len(wishes) == 0:
+    #     return False
 
     keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
     new_wishes_list = wishes[cur_offset : cur_offset + system_config["pagination"]]
