@@ -8,8 +8,6 @@ from random import uniform
 from typing import Union, Literal, Callable, List
 import mongoengine.errors
 import telebot.types
-from Tools.scripts.md5sum import usage
-from telebot.apihelper import delete_message
 from telebot.async_telebot import AsyncTeleBot
 from time import time, sleep
 from models.api_queue import ApiQueue
