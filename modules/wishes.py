@@ -35,7 +35,7 @@ async def save_wish(bot: TgBot, user: UserModel):
 async def send_new_wish(bot: TgBot, user: UserModel, wish: WishModel):
     subscribers = UserModel.objects(subscribes__contains=user)
     for sub in subscribers:
-        if sub in user.subscribes:
+        if (sub in user.subscribes) and sub.notifications:
             await bot.add_message_to_queue(sub.user_id, format_text(messages_texts["new_wish"],
                                                                     {
                                                                         "f_n": user.f_n,
@@ -73,7 +73,6 @@ def get_wishes_owner_keyboard(wishes: List[WishModel], cur_offset: int = 0):
 
     for wish in new_wishes_list:
         keyboard.add(telebot.types.InlineKeyboardButton(wish.name, callback_data=f"wish:{wish.id}:look"),
-                     telebot.types.InlineKeyboardButton(constants["delete"], callback_data=f"wish:{wish.id}:delete"),
                      telebot.types.InlineKeyboardButton(constants["edit"], callback_data=f"wish:{wish.id}:edit"),
                      telebot.types.InlineKeyboardButton(constants["realize"], callback_data=f"wish:{wish.id}:realized")
                      )

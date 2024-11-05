@@ -2,7 +2,7 @@ import telebot.types
 from models.user import UserModel
 from modules.telegram_bot import TgBot
 from configs.messages import config as messages_texts
-from modules.system import format_text, cancel_action, cancel_keyboard
+from modules.system import format_text, cancel_action, cancel_keyboard, settings_keyboard
 from modules.wishes import get_wishes_accepted_keyboard, get_category_keyboard
 from modules.subscription import get_friends_keyboard
 
@@ -10,7 +10,10 @@ from modules.subscription import get_friends_keyboard
 async def command_coordinator(bot: TgBot, message: telebot.types.Message):
     command = message.text.split(" ")[0][1:]
     args = message.text.split(" ")[1:]
+
     user = UserModel.objects.get(user_id=message.from_user.id)
+
+    await bot.add_message_to_queue(message.chat.id, message_id=message.message_id, action="delete_message")
 
     if command == "cancel":
         await cancel_action(bot, user)
@@ -53,9 +56,6 @@ async def command_coordinator(bot: TgBot, message: telebot.types.Message):
             await bot.add_message_to_queue(message.chat.id,
                                            format_text(messages_texts['friends_list']),
                                            reply_markup=get_friends_keyboard(user))
-        elif command == "private":
-            user.private = not user.private
-            user.save()
-            await bot.add_message_to_queue(message.chat.id,
-                                           format_text(messages_texts['private_true'] if user.private
-                                                       else messages_texts['private_false']))
+        elif command == "settings":
+            mes, keyboard = settings_keyboard(user)
+            await bot.add_message_to_queue(message.chat.id, text=mes, reply_markup=keyboard)

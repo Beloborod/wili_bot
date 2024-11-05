@@ -14,6 +14,9 @@ from modules.wishes import save_wish
 async def message_coordinator(bot: TgBot, message: telebot.types.Message):
     user = UserModel.objects.get(user_id=message.from_user.id)
     subscribe_id = None
+
+    await bot.add_message_to_queue(message.chat.id, message_id=message.message_id, action="delete_message")
+
     if user.status['state'] == "subscribe":
         if message.forward_origin:
             if message.forward_origin.type == "user":

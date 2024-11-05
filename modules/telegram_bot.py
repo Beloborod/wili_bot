@@ -8,6 +8,8 @@ from random import uniform
 from typing import Union, Literal, Callable, List
 import mongoengine.errors
 import telebot.types
+from Tools.scripts.md5sum import usage
+from telebot.apihelper import delete_message
 from telebot.async_telebot import AsyncTeleBot
 from time import time, sleep
 from models.api_queue import ApiQueue
@@ -49,8 +51,6 @@ class TgBot(AsyncTeleBot):
         except mongoengine.errors.DoesNotExist:
             return False
 
-        await self.calculate_user_delay(user, "message_keyboard" if reply_markup else "message")
-
         new_queue_element = ApiQueue()
         new_queue_element.user = user
         new_queue_element.text = text
@@ -63,6 +63,8 @@ class TgBot(AsyncTeleBot):
                                                                      if reply_markup
                                                                      else user.delays['next_message_can_be_sent'])
         new_queue_element.save()
+        await self.calculate_user_delay(user, "message_keyboard" if reply_markup else "message")
+
         return True
 
 
@@ -153,6 +155,11 @@ class TgBot(AsyncTeleBot):
                                                      reply_markup=pickle.loads(action.keyboard)
                                                      if action.keyboard else None,
                                                      disable_notification=action.disable_notification)
+                    if action.user.clear_chat and action.user.last_message:
+                        await self.add_message_to_queue(action.user.user_id, action="delete_message",
+                                                        message_id=action.user.last_message)
+                    action.user.last_message = result.message_id
+                    action.user.save()
                 elif action.action == "edit_message":
                     try:
                         already = QueueCallback.objects.get(user=action.user,
@@ -171,6 +178,8 @@ class TgBot(AsyncTeleBot):
                                                                   if action.keyboard else None,
                                                                   message_id=action.message_id)
                         except mongoengine.errors.DoesNotExist:
+                            action.user.last_message = action.message_id
+                            action.user.save()
                             action.delete()
                             await self.edit_message_text(chat_id=action.user.user_id,
                                                          text=messages_text['old_message'],
@@ -178,6 +187,9 @@ class TgBot(AsyncTeleBot):
                                                          message_id=action.message_id)
                             return
                 elif action.action == "delete_message":
+                    if action.message_id == action.user.last_message:
+                        action.user.last_message = None
+                        action.user.save()
                     result = await self.delete_message(chat_id=action.user.user_id, message_id=action.message_id)
                 if result and (type(result) is not bool):
                     try:

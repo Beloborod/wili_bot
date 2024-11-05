@@ -6,7 +6,7 @@ from configs.messages import config as messages_texts
 from models.user import UserModel
 from models.wish import WishModel
 from modules.subscription import get_friends_keyboard, get_friend_message_keyboard, unsubscribe
-from modules.system import format_text, cancel_keyboard, cancel_action, check_text
+from modules.system import format_text, cancel_keyboard, cancel_action, check_text, settings_keyboard
 from modules.telegram_bot import TgBot
 from modules.wishes import get_wishes_owner_keyboard, save_wish, get_friend_wishes_keyboard, \
     get_wishes_accepted_keyboard, get_category_keyboard
@@ -122,49 +122,6 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                                                    callback_data="wish:accept"
                                                )]),
                                                message_id=call.message.message_id)
-            elif data[-1] == "delete":
-                try:
-                    wish = WishModel.objects.get(id=data[1], completed=False)
-                except mongoengine.errors.DoesNotExist:
-                    await bot.add_message_to_queue(call.message.chat.id, format_text(messages_texts['wish_expired']),
-                                                   action="edit_message", message_id=call.message.message_id)
-                    return
-                await bot.add_message_to_queue(call.message.chat.id,
-                                               format_text(messages_texts['accept_delete'],
-                                                           {
-                                                               "wish_category": format_text(wish.category),
-                                                               "wish_name": wish.name,
-                                                               "wish_description": wish.description,
-                                                               "executing": constants['executed'] if wish.executor
-                                                               else constants['not_executed']
-                                                           }),
-                                               reply_markup=cancel_keyboard(
-                                                   [telebot.types.InlineKeyboardButton(
-                                                       constants['delete'],
-                                                       callback_data=f"wish:{data[1]}:delete_acc")]),
-                                               action="edit_message", message_id=call.message.message_id)
-            elif data[-1] == "delete_acc":
-                try:
-                    wish = WishModel.objects.get(id=data[1], completed=False)
-                except mongoengine.errors.DoesNotExist:
-                    await bot.add_message_to_queue(call.message.chat.id, format_text(messages_texts['wish_expired']),
-                                                   action="edit_message", message_id=call.message.message_id)
-                    return
-                mes = format_text(messages_texts['wish_deleted'], variables={
-                    "wish_category": format_text(wish.category),
-                    "wish_name": wish.name,
-                    "wish_description": wish.description,
-                    "f_n": user.f_n,
-                    "l_n": user.l_n,
-                    "user_id": user.user_id
-                })
-                if wish.executor:
-                    await bot.add_message_to_queue(wish.executor.user_id, mes)
-                await bot.add_message_to_queue(call.message.chat.id, mes, action="edit_message",
-                                               message_id=call.message.message_id)
-                user.wishes[wish.category].remove(wish)
-                user.save()
-                wish.delete()
             elif data[-1] == "realized":
                 try:
                     wish = WishModel.objects.get(id=data[1], completed=False)
@@ -201,7 +158,7 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     "l_n": user.l_n,
                     "user_id": user.user_id
                 })
-                if wish.executor:
+                if wish.executor and wish.executor.notifications:
                     await bot.add_message_to_queue(wish.executor.user_id, mes)
                 await bot.add_message_to_queue(call.message.chat.id, mes, action="edit_message",
                                                message_id=call.message.message_id)
@@ -407,6 +364,18 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                                                                "user_id": wish.owner.user_id
                                                            }), reply_markup=keyboard,
                                                action="edit_message", message_id=call.message.message_id)
+
+        elif data[0] == "settings":
+            if data[-1] == "notifications":
+                user.notifications = not user.notifications
+            elif data[-1] == "private":
+                user.private = not user.private
+            elif data[-1] == "clear_chat":
+                user.clear_chat = not user.clear_chat
+            user.save()
+            mes, keyboard = settings_keyboard(user)
+            await bot.add_message_to_queue(call.message.chat.id, mes, reply_markup=keyboard, action="edit_message",
+                                           message_id=call.message.message_id)
 
     elif user.status['state'] == "add_wish":
         if data[-1] == "accept":
