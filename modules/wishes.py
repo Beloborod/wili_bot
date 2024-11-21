@@ -25,7 +25,8 @@ async def save_wish(bot: TgBot, user: UserModel):
     category = user.status['wish_category']
     wish.category = category
     wish.save()
-    user.wishes[category].append(wish)
+    if 'wish_id' not in user.status.keys():
+        user.wishes[category].append(wish)
     user.status = system_config['default_status']
     user.save()
     await send_new_wish(bot, user, wish)
