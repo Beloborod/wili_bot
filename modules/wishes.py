@@ -46,7 +46,7 @@ async def send_new_wish(bot: TgBot, user: UserModel, wish: WishModel):
                                                                         "wish_description": wish.description,
                                                                         "wish_category": format_text(wish.category)
                                                                     }), reply_markup=get_wish_keyboard(wish.id))
-        elif not user.private:
+        elif (not user.private) and sub.notifications:
             await bot.add_message_to_queue(sub.user_id, format_text(messages_texts["new_wish"],
                                                                     {
                                                                         "f_n": user.f_n,
