@@ -38,11 +38,16 @@ def check_text(text: str):
 def settings_keyboard(user: UserModel):
     mes = format_text(messages_texts['settings'],
                       {
+                          'wish_for_all_status': constants['on'] if user.wish_for_all else constants['off'],
                           'notifications_status': constants['on'] if user.notifications else constants['off'],
                           'private_status': constants['on'] if user.private else constants['off'],
                           'clear_chat_status':  constants['on'] if user.clear_chat else constants['off']
                       })
     keyboard = telebot.types.InlineKeyboardMarkup()
+    keyboard.add(telebot.types.InlineKeyboardButton(
+        format_text("{wish_for_all}: {wish_for_all_status}",
+                    {'wish_for_all_status': constants['on'] if user.wish_for_all else constants['off']}),
+    callback_data="settings:wish_for_all"))
     keyboard.add(telebot.types.InlineKeyboardButton(
         format_text("{notifications}: {notifications_status}",
                     {'notifications_status': constants['on'] if user.notifications else constants['off']}),

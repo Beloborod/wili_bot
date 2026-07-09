@@ -220,6 +220,28 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                                                                else constants['not_executed']
                                                            }), reply_markup=keyboard,
                                                action="edit_message", message_id=call.message.message_id)
+            elif data[-1] == "look":
+                try:
+                    wish = WishModel.objects.get(id=data[1], completed=False)
+                except mongoengine.errors.DoesNotExist:
+                    await bot.add_message_to_queue(call.message.chat.id, format_text(messages_texts['wish_expired']),
+                                                   action="edit_message", message_id=call.message.message_id)
+                    return
+
+                keyboard = get_wishes_owner_keyboard(user.wishes[wish.category], int(data[2]))
+                if not keyboard:
+                    await bot.add_message_to_queue(call.message.chat.id, format_text(messages_texts['empty_category']),
+                                                   action="edit_message", message_id=call.message.message_id)
+                else:
+                    await bot.add_message_to_queue(call.message.chat.id,
+                                                   format_text(messages_texts['look_wishes'],
+                                                               variables={
+                                                                   "wish_category": format_text(wish.category),
+                                                                   "wish_name": format_text(wish.name),
+                                                                   "wish_description": format_text(wish.description)
+                                                               }),
+                                                   action="edit_message", message_id=call.message.message_id,
+                                                   reply_markup=keyboard)
 
         elif data[0] == "friend":
             if data[-1] == "list":
@@ -372,6 +394,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                 user.private = not user.private
             elif data[-1] == "clear_chat":
                 user.clear_chat = not user.clear_chat
+            elif data[-1] == "wish_for_all":
+                user.wish_for_all = not user.wish_for_all
             user.save()
             mes, keyboard = settings_keyboard(user)
             await bot.add_message_to_queue(call.message.chat.id, mes, reply_markup=keyboard, action="edit_message",

@@ -73,7 +73,7 @@ def get_wishes_owner_keyboard(wishes: List[WishModel], cur_offset: int = 0):
         new_wishes_list = wishes[:system_config["pagination"]]
 
     for wish in new_wishes_list:
-        keyboard.add(telebot.types.InlineKeyboardButton(wish.name, callback_data=f"wish:{wish.id}:look"),
+        keyboard.add(telebot.types.InlineKeyboardButton(wish.name, callback_data=f"wish:{wish.id}:{cur_offset}:look"),
                      telebot.types.InlineKeyboardButton(constants["edit"], callback_data=f"wish:{wish.id}:edit"),
                      telebot.types.InlineKeyboardButton(constants["realize"], callback_data=f"wish:{wish.id}:realized")
                      )
@@ -134,7 +134,7 @@ def get_category_keyboard(user: UserModel, action: str):
     return keyboard
 
 def get_friend_wishes_keyboard(user: UserModel, friend_id: str, category: str, cur_offset: int = 0):
-    friend = UserModel.objects.get(id=friend_id)
+    friend: UserModel = UserModel.objects.get(id=friend_id)
     if friend.private and (not (user in friend.subscribes)):
         return False
 
@@ -150,7 +150,7 @@ def get_friend_wishes_keyboard(user: UserModel, friend_id: str, category: str, c
 
     for wish in new_wishes_list:
         row = [telebot.types.InlineKeyboardButton(wish.name, callback_data=f"friend:{wish.id}:{cur_offset}:wish")]
-        if user in friend.subscribes:
+        if (user in friend.subscribes) or friend.wish_for_all:
             if not wish.executor:
                 row.append(telebot.types.InlineKeyboardButton(constants["execute"],
                                                               callback_data=f"wish:{wish.id}:{cur_offset}:execute"))

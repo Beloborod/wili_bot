@@ -21,6 +21,7 @@ class UserModel(Document):
     subscribes = ListField()
     private = BooleanField(default=False)
     notifications = BooleanField(default=False)
+    wish_for_all = BooleanField(default=True)
     clear_chat = BooleanField(default=True)
     last_message = IntField()
     ban_ends = DateTimeField()
