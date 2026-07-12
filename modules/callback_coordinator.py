@@ -262,8 +262,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     await bot.add_message_to_queue(call.message.chat.id,
                                                    format_text(messages_texts['friend_private'],
                                                                {
-                                                                   "f_n": friend.f_n,
-                                                                   "l_n": friend.l_n,
+                                                                   "f_n": friend.f_n if friend.f_n else '',
+                                                                   "l_n": friend.l_n if friend.l_n else "",
                                                                    "user_id": friend.user_id
                                                                }),
                                                    action="edit_message", message_id=call.message.message_id)
@@ -272,8 +272,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     await bot.add_message_to_queue(call.message.chat.id,
                                                    format_text(messages_texts['friend_wishes'],
                                                                {
-                                                                   "f_n": friend.f_n,
-                                                                   "l_n": friend.l_n,
+                                                                   "f_n": friend.f_n if friend.f_n else '',
+                                                                   "l_n": friend.l_n if friend.l_n else "",
                                                                    "user_id": friend.user_id,
                                                                    "wish_name": "",
                                                                    "wish_description": "",
@@ -316,8 +316,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                 await bot.add_message_to_queue(call.message.chat.id,
                                                format_text(messages_texts['friend_delete'],
                                                            {
-                                                               "f_n": friend.f_n,
-                                                               "l_n": friend.l_n,
+                                                               "f_n": friend.f_n if friend.f_n else '',
+                                                               "l_n": friend.l_n if friend.l_n else "",
                                                                "user_id": friend.user_id,
                                                            }),
                                                reply_markup=cancel_keyboard([
@@ -331,8 +331,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     await bot.add_message_to_queue(call.message.chat.id,
                                                    format_text(messages_texts['friend_deleted'],
                                                                {
-                                                                   "f_n": friend.f_n,
-                                                                   "l_n": friend.l_n,
+                                                                   "f_n": friend.f_n if friend.f_n else '',
+                                                                   "l_n": friend.l_n if friend.l_n else "",
                                                                    "user_id": friend.user_id,
                                                                }),
                                                    action="edit_message", message_id=call.message.message_id)
@@ -340,8 +340,8 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     await bot.add_message_to_queue(call.message.chat.id,
                                                    format_text(messages_texts['friend_already_deleted'],
                                                                {
-                                                                   "f_n": friend.f_n,
-                                                                   "l_n": friend.l_n,
+                                                                   "f_n": friend.f_n if friend.f_n else '',
+                                                                   "l_n": friend.l_n if friend.l_n else "",
                                                                    "user_id": friend.user_id,
                                                                }),
                                                    action="edit_message", message_id=call.message.message_id)

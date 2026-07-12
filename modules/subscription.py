@@ -91,7 +91,7 @@ def get_friends_keyboard(user: UserModel, cur_offset: int = 0):
         new_friends_list = friends[:system_config["pagination"]]
 
     for friend in new_friends_list:
-        keyboard.add(telebot.types.InlineKeyboardButton(friend.f_n + " " + friend.l_n,
+        keyboard.add(telebot.types.InlineKeyboardButton(friend.f_n if friend.f_n else '' + " " + friend.l_n if friend.l_n else "",
                                                         callback_data=f"friend:{friend.id}:look"),
                      telebot.types.InlineKeyboardButton(constants["unsubscribe"],
                                                         callback_data=f"friend:{friend.id}:delete")
@@ -117,8 +117,8 @@ def get_friend_message_keyboard(user: UserModel, friend_id: str):
     if friend.private and (not (user in friend.subscribes)):
         mes = format_text(messages_texts['friend_private'],
                            {
-                               "f_n": friend.f_n,
-                               "l_n": friend.l_n,
+                               "f_n": friend.f_n if friend.f_n else '',
+                               "l_n": friend.l_n if friend.l_n else "",
                                "user_id": friend.user_id
                            })
     else:
@@ -127,8 +127,8 @@ def get_friend_message_keyboard(user: UserModel, friend_id: str):
                                                             callback_data=f"friend:{friend.id}:{category}:0:category"))
         mes = format_text(messages_texts['friend_categories'],
                           {
-                              "f_n": friend.f_n,
-                              "l_n": friend.l_n,
+                              "f_n": friend.f_n if friend.f_n else '',
+                              "l_n": friend.l_n if friend.l_n else "",
                               "user_id": friend.user_id
                           })
     keyboard.add(telebot.types.InlineKeyboardButton(constants["step_back"],
