@@ -195,7 +195,7 @@ async def callback_coordinator(bot: TgBot, call: telebot.types.CallbackQuery):
                     await bot.add_message_to_queue(call.message.chat.id, format_text(messages_texts['wish_expired']),
                                                    action="edit_message", message_id=call.message.message_id)
                     return
-                if not (user in wish.owner.subscribes):
+                if (not (user in wish.owner.subscribes)) and not wish.owner.wish_for_all:
                     await bot.add_message_to_queue(call.message.chat.id,
                                                    format_text(messages_texts['not_subscriber_friend'],
                                                                {
